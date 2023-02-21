@@ -48,8 +48,16 @@ macro_rules! wavetable_oscillator {
             }
 
             fn update_delta_phi(&mut self) {
-                // self.delta_phi =
-                //     (((self.mfreq.0 as i64) * (PHI_MAX as i64)) / (self.msample_rate.0 as i64)) as i32;
+                // Normally this function would look like this:
+                // self.delta_phi = (((self.mfreq.0 as i64) * (PHI_MAX as i64))
+                //     / (self.msample_rate.0 as i64)) as i32;
+
+                // But since msample_rate is not constrained to be a power of
+                // two, the resulting 64-bit division could be very expensive.
+                // To avoid this, we perform a coefficient exchange between
+                // PHI_MAX and msample_rate such that the denominator DIVIDER
+                // becomes a power of two and alpha absorbs the exact value. See
+                // also [update_alpha].
                 self.delta_phi =
                     (((self.mfreq.0 as i64) * (self.alpha as i64)) / (DIVIDER as i64)) as i32;
             }
