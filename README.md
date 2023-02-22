@@ -1,45 +1,11 @@
 # Minimal audio synthesis library for non-FPU architectures
-- integer
-- high performance
-- minimal
-- synth
-- anatomy
-- chain
-- isopoda.rs
-
-## Signal formats
-
-### i32
-Most common data type on MCUs. Common and efficient also on CPUs. Dynamic range
-of 192 dB is too high for most purposes.
-
-### i16
-Dynamic range of 96 dB is adequate for most purposes. 
-
-
-### i8
-Constrained dynamic range of 48 dB is only relevant for lo-fi applications. 
-
-
-### f32
-Only usable if your architecture has an FPU. Dynamic range extends to 1529 dB
-which is far above audio requirements. Some computations are more efficient with
-`f32` and FPU, others are less efficient as compared to integer operations.
-
-
-## Other formats
-
-### frequency
-Frequencies are represented in Hz oder mHz and implemented as `u32`. For some
-necessary internal operations frequencies have to be multiplied and hence some
-`i64`-operations occur. Truncating the precision for increased performance would reduce to frequency resolution to almost 1 Hz and is therefore inacceptable.
 
 ## Architecture
 The central component in isopoda is the `Synth` structure which implements the
 `Iterator` trait and connects the signal chain to the audio stream handler.
-Depending on the hardware setup it can also implement `rodio::source::Source` 
-trait. The `next()` function in `Synth` returns the next sample and updates 
-the internal state. It also contains the definition of the signal chain: 
+Depending on the hardware setup it can also implement the `rodio::source::Source` trait. The `next()` function in `Synth` returns the 
+next sample and updates the internal state. It also contains the definition 
+of the signal chain: 
 ```rust
 // Sawtooth signal with frequency modulated low pass filter 
 fn next() -> Option<i16> {
@@ -78,3 +44,35 @@ Effects and filters
 ### Env
 Envelops
 - LinExp
+
+
+## Signal formats
+
+There are three integer and one float signal format in isopoda.
+
+### i32
+Most common data type on MCUs. Common and efficient also on CPUs. Dynamic 
+range of 192 dB is more than enough for most purposes.
+
+### i16
+Dynamic range of 96 dB is adequate for most purposes. 
+
+
+### i8
+Constrained dynamic range of 48 dB is only relevant for lo-fi applications on 8-bit microcontrollers.
+
+
+### f32
+Only usable if your architecture has an FPU. Dynamic range extends to 1529 dB
+which is far above audio requirements. Some computations are more efficient with
+`f32` and FPU, others are less efficient as compared to integer operations.
+
+
+## Other formats
+
+### frequency
+Frequencies are represented in Hz oder mHz and implemented as `u32`. For some 
+necessary internal operations frequencies have to be multiplied together and 
+hence some `i64`-operations occur. Truncating the precision to `u16` or so 
+for increased performance would reduce to frequency resolution to almost 1 Hz 
+and is therefore inacceptable.
