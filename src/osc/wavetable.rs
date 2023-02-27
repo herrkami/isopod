@@ -5,7 +5,7 @@ use crate::util::units::{mHz, Frequency, Hz};
 const PHI_MAX: i32 = 1 << 20;
 /// Magic divider constant for efficient divisions in the performance critical
 /// functions
-const DIVIDER: i32 = 1 << 28;
+const DIVIDER: i32 = 1 << 26;
 
 macro_rules! wavetable_oscillator {
     ($($name: ident),+ $(,)?) => ($(
@@ -44,7 +44,14 @@ macro_rules! wavetable_oscillator {
             }
 
             fn update_alpha(&mut self) {
-                self.alpha = ((PHI_MAX as i64)*(DIVIDER as i64) / (self.msample_rate.0 as i64)) as i32;
+                self.alpha = (((PHI_MAX as i64)*(DIVIDER as i64) as i64) / (self.msample_rate.0 as i64)) as i32;
+                // println!("------------------alpha");
+                // println!("PHI_MAX: {:?}", PHI_MAX);
+                // println!("DIVIDER: {:?}", DIVIDER);
+                // println!("PHI_MAX*DIVIDER: {:?}", (PHI_MAX as i64)*(DIVIDER as i64));
+                // println!("alpha: {:?}", self.alpha);
+                // println!("alpha (casted): {:?}", ((PHI_MAX as i64)*(DIVIDER as i64) as i64) / (self.msample_rate.0 as i64));
+
             }
 
             fn update_delta_phi(&mut self) {
@@ -60,10 +67,15 @@ macro_rules! wavetable_oscillator {
                 // also [update_alpha].
                 self.delta_phi =
                     (((self.mfreq.0 as i64) * (self.alpha as i64)) / (DIVIDER as i64)) as i32;
+            //     println!("------------------delta_phi");
+            //     println!("delta_phi: {:?}", self.delta_phi);
+            //     println!("alpha: {:?}", self.alpha);
+            //     println!("mfreq: {:?}", self.mfreq.0);
+            //     println!("DIVIDER: {:?}", DIVIDER);
             }
 
-            /// Increments phase accumulator and returns either the next sample or None
-            /// if the generator is not running
+            /// Increments the phase accumulator and returns the next sample. If
+            /// the generator is not running, it returns `None`.
             #[inline]
             pub fn _next(&mut self) -> Option<T>
             where
@@ -85,66 +97,72 @@ macro_rules! wavetable_oscillator {
                 }
             }
 
-            /// Set the wavetable
+            /// Sets the wavetable.
             pub fn set_wavetable(&mut self, wavetable: &'static [T]) {
                 self.wavetable = wavetable;
                 self.idx_max = self.wavetable.len();
             }
 
-            /// Set repeat to true or false
+            /// Sets repeat to true or false. If false, the oscillator will stop
+            /// after one period.
             pub fn set_repeat(&mut self, repeat: bool) {
                 self.repeat = repeat;
             }
 
-            /// Set the generator into "running" mode
+            /// Sets the generator into "running" mode.
             pub fn start(&mut self) {
                 self.running = true;
             }
 
-            /// Stop the generator (disable "running" mode)
+            /// Stops the generator (disable "running" mode). Holds the last
+            /// phase value.
             pub fn stop(&mut self) {
                 self.running = false;
             }
 
-            /// Resets the phase accumulator
+            /// Resets the phase accumulator to 0.
             pub fn reset(&mut self) {
                 self.phi = 0;
             }
 
-            /// Resets the phase accumulator and set the generator into "running" mode
+            /// Resets the phase accumulator 0 and sets the generator into
+            /// "running" mode
             pub fn reset_and_start(&mut self) {
                 self.reset();
                 self.running = true;
             }
 
-            /// Stops the generator and reset the phase accumulator
+            /// Stops the generator and reset the phase accumulator to 0.
             pub fn stop_and_reset(&mut self) {
                 self.running = false;
                 self.reset();
             }
 
-            /// Returns whether the generator is running
+            /// True if the generator is running.
             pub fn is_running(&self) -> bool {
                 self.running
             }
 
-            /// Sets the frequency
+            /// Sets the frequency in mHz.
             pub fn set_mfreq(&mut self, mfreq: mHz) {
                 self.mfreq = mfreq;
                 self.update_delta_phi();
             }
 
+            /// Sets the frequency in Hz.
             pub fn set_freq(&mut self, freq: Hz) {
                 self.mfreq = freq.to_mHz();
                 self.update_delta_phi();
             }
 
+            /// Sets the sample rate in mHz.
             pub fn set_msample_rate(&mut self, msample_rate: mHz) {
                 self.msample_rate = msample_rate;
                 self.update_alpha();
                 self.update_delta_phi();
             }
 
+            /// Sets the sample rate in Hz.
             pub fn set_sample_rate(&mut self, sample_rate: Hz) {
                 self.msample_rate = sample_rate.to_mHz();
                 self.update_alpha();
@@ -183,7 +201,7 @@ impl WavetableOscillator<i16> {
             alpha: 0,
 
             idx: 0,
-            idx_max: SINE_I16.len(),
+            idx_max: 0,
         };
         s.set_sample_rate(Hz(44100));
         s.set_freq(Hz(440));

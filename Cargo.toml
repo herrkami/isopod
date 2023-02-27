@@ -5,8 +5,9 @@ edition = "2021"
 authors = ["Korbinian Schreiber"]
 
 [dependencies]
-# num = "0.4.0"
-rodio = "0.16.0"
+num = "0.4.0"
+rodio = "0.17.0"
+num-traits = "0.2.15"
 
 [profile.release]
 # opt-level = 'z'     # Optimize for size
