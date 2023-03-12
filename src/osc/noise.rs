@@ -41,7 +41,7 @@ impl Default for LFSR<u16> {
     }
 }
 
-/// 32-bit linear feedback shift register
+/// 16-bit linear feedback shift register
 impl LFSR<u16> {
     /// Returns the next value
     #[inline]
@@ -84,7 +84,7 @@ impl<T> WhiteNoise<T> {
 // }
 
 impl WhiteNoise<i16> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let _lfsr = LFSR::<u32>::default();
         let _seed = 0x0abe;
         let s = Self {
@@ -96,7 +96,7 @@ impl WhiteNoise<i16> {
 }
 
 impl WhiteNoise<i32> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let _lfsr = LFSR::<u32>::default();
         let _seed = 0x0abe;
         let s = Self {
