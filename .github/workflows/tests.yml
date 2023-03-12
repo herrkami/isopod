@@ -24,3 +24,5 @@ jobs:
       run: |
         sudo apt-get install libasound2-dev
         cargo test --verbose
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
