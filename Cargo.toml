@@ -1,5 +1,5 @@
 [package]
-name = "isopoda"
+name = "isopod"
 version = "0.1.0"
 edition = "2021"
 authors = ["Korbinian Schreiber"]

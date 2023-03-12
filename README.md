@@ -1,10 +1,10 @@
 # Minimal audio synthesis library for non-FPU architectures
 
 ## Architecture
-isopoda provides a set of simple and efficient DSP primitives which can be
+isopod provides a set of simple and efficient DSP primitives which can be
 chained, added and multiplied together. They are grouped into three categories,
 oscillators (`osc`), effects (`fx`), and envelopes (`env`). The central
-component in isopoda is the `Synth` structure which implements the `Iterator`
+component in isopod is the `Synth` structure which implements the `Iterator`
 trait and connects the signal chain to the audio stream handler. Depending on
 the hardware setup it can also implement the `rodio::source::Source` trait. The
 `next()` function in `Synth` returns the next sample and updates the internal
@@ -55,7 +55,7 @@ implemented).
 
 ## Signal formats
 
-There are three integer and one float signal format in isopoda.
+There are three integer and one float signal format in isopod.
 
 ### i32
 Most common data type on MCUs. Common and efficient also on CPUs. Dynamic
@@ -85,3 +85,8 @@ operations are necessary to avoid overflow.
 Representing the frequency as `u16` for increased performance would reduce the
 frequency resolution to almost 1 Hz and is therefore not acceptable.
 
+
+# TODO
+- [ ] Unify everything to `i16` signal and `u32` frequency.
+- [ ] Set everything to unsigned that doesn't need to be signed.
+- [ ] Check division/shift for performance optimizations.

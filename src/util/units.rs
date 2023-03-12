@@ -1,6 +1,8 @@
+use std::ops::Deref;
+
 /// Unit mHz
 /// ```
-/// # use isopoda::util::units::*;
+/// # use isopod::util::units::*;
 /// assert_eq!(mHz(1).to_mHz(), mHz(1));
 /// assert_eq!(mHz(1000).to_Hz(), Hz(1));
 /// assert_eq!(mHz(1000000).to_kHz(), kHz(1));
@@ -11,7 +13,7 @@ pub struct mHz(pub u32);
 
 /// Unit Hz
 /// ```
-/// # use isopoda::util::units::*;
+/// # use isopod::util::units::*;
 /// assert_eq!(Hz(1).to_mHz(), mHz(1000));
 /// assert_eq!(Hz(1).to_Hz(), Hz(1));
 /// assert_eq!(Hz(1000).to_kHz(), kHz(1));
@@ -21,7 +23,7 @@ pub struct Hz(pub u32);
 
 /// Unit kHz
 /// ```
-/// # use isopoda::util::units::*;
+/// # use isopod::util::units::*;
 /// assert_eq!(kHz(1).to_mHz(), mHz(1000000));
 /// assert_eq!(kHz(1).to_Hz(), Hz(1000));
 /// assert_eq!(kHz(1).to_kHz(), kHz(1));
@@ -72,3 +74,11 @@ impl Frequency for kHz {
         kHz(self.0)
     }
 }
+
+// impl Deref for mHz {
+//     type Target = u32;
+
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }

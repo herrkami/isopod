@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use num::{Integer, PrimInt};
 
 use crate::util::units::{mHz, Frequency, Hz};
@@ -54,8 +56,9 @@ impl LFSR<u16> {
 }
 
 pub struct WhiteNoise<T> {
-    seed: T,
     lfsr: LFSR<u32>,
+    seed: T,
+    // phantom: PhantomData<T>,
 }
 
 impl<T> WhiteNoise<T> {
@@ -64,13 +67,14 @@ impl<T> WhiteNoise<T> {
     }
 }
 
-// impl<T> WhiteNoise<T>
+// impl<T: Integer> WhiteNoise<T>
+// // const generic
 // where
 //     T: Integer,
 // {
 //     fn new() -> Self {
 //         let _lfsr = LFSR::<u32>::default();
-//         let _seed: T = 0xbabe;
+//         let _seed: T = 42;
 //         let s = Self {
 //             seed: _seed,
 //             lfsr: _lfsr,
@@ -94,7 +98,7 @@ impl WhiteNoise<i16> {
 impl WhiteNoise<i32> {
     fn new() -> Self {
         let _lfsr = LFSR::<u32>::default();
-        let _seed = 0x00febabe;
+        let _seed = 0x0abe;
         let s = Self {
             seed: _seed,
             lfsr: _lfsr,
@@ -152,23 +156,67 @@ mod test {
 
     #[test]
     fn test_white_noise16() {
-        todo!("This test sucks and the function likely fails.");
-        const N: i32 = 100_000;
+        const N: i32 = 1_000_000;
         let mut white_noise = WhiteNoise::<i16>::new();
-        let (mut avg_p, mut avg_n) = (0_i32, 0_i32);
+        let mut avg = 0_i32;
+        let mut min = 0_i32;
+        let mut max = 0_i32;
         let mut sym = 0_i32;
-        for i in 0..N {
+        for _ in 0..N {
             let x = white_noise.next();
             match x {
                 Some(x) if x > 0 => sym += 1,
                 Some(x) if x < 0 => sym -= 1,
                 _ => {}
             }
-            avg_p += x.unwrap() as i32;
+            if (x.unwrap() as i32) < min {
+                min = x.unwrap() as i32;
+            }
+            if (x.unwrap() as i32) > max {
+                max = x.unwrap() as i32;
+            }
+            avg += x.unwrap() as i32;
+            // println!("{:?}", x.unwrap());
         }
-        // avg_p /= N / 2;
+        avg /= N;
         // avg_n /= N / 2;
-        println!("{:?}, {:?}, {:?}", avg_p, sym, N);
+        println!(
+            "avg: {:?}, sym: {:?} of {:?}, min: {:?}, max: {:?}",
+            avg, sym, N, min, max
+        );
+    }
+
+    #[test]
+    fn test_white_noise32() {
+        const N: i32 = 1_000_000;
+        let mut white_noise = WhiteNoise::<i32>::new();
+        let mut avg = 0_f32;
+        let mut min = 0_i64;
+        let mut max = 0_i64;
+        let mut sym = 0_f32;
+        for _ in 0..N {
+            let x = white_noise.next();
+            match x {
+                Some(x) if x > 0 => sym += 1.0,
+                Some(x) if x < 0 => sym -= 1.0,
+                _ => {}
+            }
+            if (x.unwrap() as i64) < min {
+                min = x.unwrap() as i64;
+            }
+            if (x.unwrap() as i64) > max {
+                max = x.unwrap() as i64;
+            }
+            avg += x.unwrap() as f32;
+            // println!("{:?}", x.unwrap());
+        }
+        avg /= (i32::MAX as i64 * N as i64) as f32;
+        sym /= N as f32;
+        // avg_n /= N / 2;
+        println!(
+            "avg: {:?}, sym: {:?} of {:?}, min: {:?}, max: {:?}",
+            avg, sym, N, min, max
+        );
     }
 }
 

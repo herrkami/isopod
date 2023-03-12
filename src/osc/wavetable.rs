@@ -67,11 +67,11 @@ macro_rules! wavetable_oscillator {
                 // also [update_alpha].
                 self.delta_phi =
                     (((self.mfreq.0 as i64) * (self.alpha as i64)) / (DIVIDER as i64)) as i32;
-            //     println!("------------------delta_phi");
-            //     println!("delta_phi: {:?}", self.delta_phi);
-            //     println!("alpha: {:?}", self.alpha);
-            //     println!("mfreq: {:?}", self.mfreq.0);
-            //     println!("DIVIDER: {:?}", DIVIDER);
+                // println!("------------------delta_phi");
+                // println!("delta_phi: {:?}", self.delta_phi);
+                // println!("alpha: {:?}", self.alpha);
+                // println!("mfreq: {:?}", self.mfreq.0);
+                // println!("DIVIDER: {:?}", DIVIDER);
             }
 
             /// Increments the phase accumulator and returns the next sample. If
@@ -229,7 +229,7 @@ impl SineOscillator<i16> {
             idx: 0,
             idx_max: SINE_I16.len(),
         };
-        s.set_sample_rate(Hz(44100));
+        s.set_sample_rate(Hz(44_100));
         s.set_freq(Hz(440));
         s
     }

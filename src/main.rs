@@ -1,7 +1,7 @@
-use isopoda::osc::luts::SINE_I16;
-use isopoda::osc::noise::LFSR;
-use isopoda::osc::wavetable::WavetableOscillator;
-use isopoda::util::units::Hz;
+use isopod::osc::luts::SINE_I16;
+use isopod::osc::noise::LFSR;
+use isopod::osc::wavetable::WavetableOscillator;
+use isopod::util::units::Hz;
 
 fn main() {
     // Debug wavetable oscillator
