@@ -239,19 +239,19 @@ use core::time::Duration;
 use rodio::source::Source;
 impl Source for WavetableOscillator<i16> {
     fn channels(&self) -> u16 {
-        return 1;
+        1
     }
 
     fn sample_rate(&self) -> u32 {
-        return self.msample_rate.to_Hz().0;
+        self.msample_rate.to_Hz().0
     }
 
     fn current_frame_len(&self) -> Option<usize> {
-        return None;
+        None
     }
 
     fn total_duration(&self) -> Option<Duration> {
-        return None;
+        None
     }
 }
 
