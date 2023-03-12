@@ -1,11 +1,14 @@
 # Minimal audio synthesis library for non-FPU architectures
 
 ## Architecture
-The central component in isopoda is the `Synth` structure which implements the
-`Iterator` trait and connects the signal chain to the audio stream handler.
-Depending on the hardware setup it can also implement the `rodio::source::Source` trait. The `next()` function in `Synth` returns the
-next sample and updates the internal state. It also contains the definition
-of the signal chain:
+isopoda provides a set of simple and efficient DSP primitives which can be
+chained, added and multiplied together. They are grouped into three categories,
+oscillators (`osc`), effects (`fx`), and envelopes (`env`). The central
+component in isopoda is the `Synth` structure which implements the `Iterator`
+trait and connects the signal chain to the audio stream handler. Depending on
+the hardware setup it can also implement the `rodio::source::Source` trait. The
+`next()` function in `Synth` returns the next sample and updates the internal
+state. It also contains the definition of the signal chain:
 ```rust
 // Sawtooth signal with frequency modulated low pass filter
 fn next() -> Option<i16> {
@@ -16,12 +19,9 @@ fn next() -> Option<i16> {
 }
 ```
 
-isopoda provides a set of simple and efficient DSP primitives which can be
-chained, added and multiplied together. They are grouped into three
-categories, oscillators (`osc`), effects (`fx`), and envelopes (`env`).
-
 ## Primitives
-Those are the primitives in isopoda. The checkboxes indicate whether they are implemented already.
+The chain can consist of the following primitives (unchecked is not yet
+implemented). 
 
 - Oscillators (Osc)
     - Wavetable oscillators
@@ -32,15 +32,16 @@ Those are the primitives in isopoda. The checkboxes indicate whether they are im
         - [ ] Square
         - [ ] Chaos
     - Noise
-        - [ ] WhiteNoise
+        - [x] WhiteNoise
         - [ ] PinkNoise
         - [ ] BitFlipNoise
         - [ ] CrackleNoise
 - Effects (FX)
     - Linear filters (small buffer sizes)
-        - [ ] LPF
-        - [ ] BPF
-        - [ ] HPF
+        - [ ] LPF (part of the state variable filter)
+        - [ ] BPF (part of the state variable filter)
+        - [ ] HPF (part of the state variable filter)
+        - [ ] Notch (part of the state variable filter)
     - Delays and Reverbs (requires large buffer )
         - [ ] Delay
         - [ ] Reverb
@@ -77,8 +78,10 @@ which is far above audio requirements. Some computations are more efficient with
 ## Other formats
 
 ### frequency
-Frequencies are represented in Hz oder mHz and implemented as `u32`. For some
-necessary internal operations frequencies have to be multiplied together and
-hence some `i64`-operations occur. Truncating the precision to `u16` or so
-for increased performance would reduce to frequency resolution to almost 1 Hz
-and is therefore inacceptable.
+Frequencies are represented in `Hz` oder `mHz` and implemented as `u32`. For
+some internal operations frequencies have to be multiplied and hence some 64 bit
+operations are necessary to avoid overflow. 
+
+Representing the frequency as `u16` for increased performance would reduce the
+frequency resolution to almost 1 Hz and is therefore not acceptable.
+
