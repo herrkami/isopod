@@ -87,6 +87,9 @@ frequency resolution to almost 1 Hz and is therefore not acceptable.
 
 
 # TODO
+- [ ] Implement overflow handling.
 - [ ] Unify everything to `i16` signal and `u32` frequency.
 - [ ] Set everything to unsigned that doesn't need to be signed.
+  - [ ] Especially alpha in wavetable.rs
 - [ ] Check division/shift for performance optimizations.
+- [ ] Replace the macro in wavetable.rs by a solution that takes a nested struct. This might become unnecessary if all signals are set to `i16`.
