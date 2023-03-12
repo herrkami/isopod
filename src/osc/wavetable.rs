@@ -3,9 +3,9 @@ use crate::util::units::{mHz, Frequency, Hz};
 
 /// Maximum value of the phase accumulator
 const PHI_MAX: i32 = 1 << 20;
-/// Magic divider constant for efficient divisions in the performance critical
-/// functions
-const DIVIDER: i32 = 1 << 26;
+/// Magic normalization constant for efficient divisions in the performance
+/// critical functions
+const NORM: i32 = 1 << 26;
 
 macro_rules! wavetable_oscillator {
     ($($name: ident),+ $(,)?) => ($(
@@ -44,13 +44,13 @@ macro_rules! wavetable_oscillator {
             }
 
             fn update_alpha(&mut self) {
-                self.alpha = (((PHI_MAX as i64)*(DIVIDER as i64) as i64) / (self.msample_rate.0 as i64)) as i32;
+                self.alpha = (((PHI_MAX as i64)*(NORM as i64) as i64) / (self.msample_rate.0 as i64)) as i32;
                 // println!("------------------alpha");
                 // println!("PHI_MAX: {:?}", PHI_MAX);
-                // println!("DIVIDER: {:?}", DIVIDER);
-                // println!("PHI_MAX*DIVIDER: {:?}", (PHI_MAX as i64)*(DIVIDER as i64));
+                // println!("NORM: {:?}", NORM);
+                // println!("PHI_MAX*NORM: {:?}", (PHI_MAX as i64)*(NORM as i64));
                 // println!("alpha: {:?}", self.alpha);
-                // println!("alpha (casted): {:?}", ((PHI_MAX as i64)*(DIVIDER as i64) as i64) / (self.msample_rate.0 as i64));
+                // println!("alpha (casted): {:?}", ((PHI_MAX as i64)*(NORM as i64) as i64) / (self.msample_rate.0 as i64));
 
             }
 
@@ -62,16 +62,16 @@ macro_rules! wavetable_oscillator {
                 // But since msample_rate is not constrained to be a power of
                 // two, the resulting 64-bit division could be very expensive.
                 // To avoid this, we perform a coefficient exchange between
-                // PHI_MAX and msample_rate such that the denominator DIVIDER
+                // PHI_MAX and msample_rate such that the denominator NORM
                 // becomes a power of two and alpha absorbs the exact value. See
                 // also [update_alpha].
                 self.delta_phi =
-                    (((self.mfreq.0 as i64) * (self.alpha as i64)) / (DIVIDER as i64)) as i32;
+                    (((self.mfreq.0 as i64) * (self.alpha as i64)) / (NORM as i64)) as i32;
                 // println!("------------------delta_phi");
                 // println!("delta_phi: {:?}", self.delta_phi);
                 // println!("alpha: {:?}", self.alpha);
                 // println!("mfreq: {:?}", self.mfreq.0);
-                // println!("DIVIDER: {:?}", DIVIDER);
+                // println!("NORM: {:?}", NORM);
             }
 
             /// Increments the phase accumulator and returns the next sample. If
