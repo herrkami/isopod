@@ -1,3 +1,6 @@
+![Tests](https://github.com/herrkami/isopod/actions/workflows/tests.yml/badge.svg)
+![Last commit](https://img.shields.io/github/last-commit/herrkami/isopod)
+
 # Minimal audio synthesis library for non-FPU architectures
 
 ## Architecture
@@ -38,10 +41,10 @@ implemented).
         - [ ] CrackleNoise
 - Effects (FX)
     - Linear filters (small buffer sizes)
-        - [ ] LPF (part of the state variable filter)
-        - [ ] BPF (part of the state variable filter)
-        - [ ] HPF (part of the state variable filter)
-        - [ ] Notch (part of the state variable filter)
+        - [x] LPF (part of the state variable filter)
+        - [x] BPF (part of the state variable filter)
+        - [x] HPF (part of the state variable filter)
+        - [x] Notch (part of the state variable filter)
     - Delays and Reverbs (requires large buffer )
         - [ ] Delay
         - [ ] Reverb
