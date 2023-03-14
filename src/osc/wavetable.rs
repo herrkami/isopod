@@ -5,10 +5,10 @@ use crate::util::units::{mHz, Frequency, Hz};
 use std::ops::{Deref, DerefMut};
 
 /// Maximum value of the phase accumulator
-const PHI_MAX: i32 = 1 << 20;
+const PHI_MAX: u32 = 1 << 20;
 /// Magic normalization constant for efficient divisions in the performance
 /// critical functions
-const NORM: i32 = 1 << 26;
+const NORM: u32 = 1 << 26;
 
 /// Stateful wavetable signal generator
 pub struct Engine<T: 'static> {
@@ -26,11 +26,11 @@ pub struct Engine<T: 'static> {
     wavetable: &'static [T],
 
     // Phase accumulator
-    phi: i32,
+    phi: u32,
     // Frequency dependent phase increment
-    delta_phi: i32,
+    delta_phi: u32,
     // Constant for frequency to phase translation
-    alpha: i32,
+    alpha: u32,
 
     // Current wavetable index
     idx: usize,
@@ -40,12 +40,12 @@ pub struct Engine<T: 'static> {
 
 impl<T> Engine<T> {
     fn update_idx(&mut self) {
-        self.idx = (((self.idx_max as i32) * self.phi) / PHI_MAX) as usize;
+        self.idx = (((self.idx_max as u32) * self.phi) / PHI_MAX) as usize;
     }
 
     fn update_alpha(&mut self) {
         self.alpha =
-            (((PHI_MAX as i64) * (NORM as i64) as i64) / (self.msample_rate.0 as i64)) as i32;
+            (((PHI_MAX as u64) * (NORM as u64) as u64) / (self.msample_rate.0 as u64)) as u32;
         // println!("------------------alpha");
         // println!("PHI_MAX: {:?}", PHI_MAX);
         // println!("NORM: {:?}", NORM);
@@ -65,7 +65,7 @@ impl<T> Engine<T> {
         // PHI_MAX and msample_rate such that the denominator NORM
         // becomes a power of two and alpha absorbs the exact value. See
         // also [update_alpha].
-        self.delta_phi = (((self.mfreq.0 as i64) * (self.alpha as i64)) / (NORM as i64)) as i32;
+        self.delta_phi = (((self.mfreq.0 as u64) * (self.alpha as u64)) / (NORM as u64)) as u32;
         // println!("------------------delta_phi");
         // println!("delta_phi: {:?}", self.delta_phi);
         // println!("alpha: {:?}", self.alpha);
@@ -80,6 +80,7 @@ impl<T> Engine<T> {
     where
         T: Copy,
     {
+        // TODO Replace if-clause by masked addition
         self.phi += self.delta_phi;
         if self.phi > PHI_MAX {
             self.phi -= PHI_MAX;
