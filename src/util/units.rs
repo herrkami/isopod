@@ -40,11 +40,29 @@ pub struct Hz(pub u32);
 pub struct kHz(pub u32);
 
 /// Unit ms (milliseconds)
+/// ```
+/// # use isopod::util::units::*;
+/// assert_eq!(ms(1_000_000).to_mHz(), mHz(1));
+/// assert_eq!(ms(1_000).to_Hz(), Hz(1));
+/// assert_eq!(ms(1).to_kHz(), kHz(1));
+///
+/// assert_eq!(ms(1).to_us(), us(1_000));
+/// assert_eq!(ms(1).to_ms(), ms(1));
+/// ```
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ms(pub u32);
 
 /// Unit us (microseconds)
+/// ```
+/// # use isopod::util::units::*;
+/// assert_eq!(us(1_000_000).to_mHz(), mHz(1_000));
+/// assert_eq!(us(1_000).to_Hz(), Hz(1_000));
+/// assert_eq!(us(1).to_kHz(), kHz(1_000));
+///
+/// assert_eq!(us(1).to_us(), us(1));
+/// assert_eq!(us(1_000).to_ms(), ms(1));
+/// ```
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct us(pub u32);
