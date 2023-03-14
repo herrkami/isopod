@@ -116,13 +116,23 @@ fn write_table_to_file<T: Sized + MaxAmp + Display>(wavetable: Wavetable<T>, fna
     if wave_string == "EXP" {
         let t = &wavetable.table[0];
         let tau = t.cast(((wavetable.len as f64) / t.max_amp().ln()).round());
+        let max = t;
         array_string.push_str("\r\n");
-        array_string.push_str("pub const TAU_");
+
+        array_string.push_str("pub const ");
         array_string.push_str(&wave_string);
         array_string.push_str("_");
         array_string.push_str(&type_string.to_uppercase());
-        array_string.push_str(": usize = ");
+        array_string.push_str("_TAU: usize = ");
         array_string.push_str(tau.to_string().as_str());
+        array_string.push_str(";\r\n");
+
+        array_string.push_str("pub const ");
+        array_string.push_str(&wave_string);
+        array_string.push_str("_");
+        array_string.push_str(&type_string.to_uppercase());
+        array_string.push_str("_MAX: usize = ");
+        array_string.push_str(max.to_string().as_str());
         array_string.push_str(";\r\n");
     }
 
