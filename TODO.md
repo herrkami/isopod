@@ -12,9 +12,12 @@ Minimal audio synthesis library for non-FPU architectures
 
 ### In Progress
 
+- [ ] Add `ns`.
+- [ ] Add doc tests for `us` and `ms`.
 
 ### Done ✓
 
+- [x] Implement `Period` and `Frequency` for `us` and `ms`.
 - [x] Replace the macro in wavetable.rs by a solution that takes a nested
   struct. This might become unnecessary if all signals are set to `i16`.  
 - [x] Sign of alpha in wavetable.rs  
