@@ -9,13 +9,16 @@ Minimal audio synthesis library for non-FPU architectures
 - [ ] Unify everything to `i16` signal and `u32` frequency.  
 - [ ] Implement overflow handling.
 - [ ] Replace if-clause in `Engine::_next()` by masked addition
+- [ ] Add `ns` and its doctest.
+- [ ] Add linear interpolation iterator to wavetable.
 
 ### In Progress
 
-- [ ] Add `ns` and add doctest.
+  - [ ] Reduce the size of `exp_*` and add linear interpolation.
 
 ### Done ✓
 
+- [x] Add `ExpDecay` to wavetable.rs
 - [x] Add doc tests for `us` and `ms`.
 - [x] Implement `Period` and `Frequency` for `us` and `ms`.
 - [x] Replace the macro in wavetable.rs by a solution that takes a nested

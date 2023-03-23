@@ -1,8 +1,8 @@
 use derive_deref_rs::Deref;
 
 use crate::osc::luts::SINE_I16;
-use crate::util::units::{mHz, Frequency, Hz};
-use std::ops::{Deref, DerefMut};
+use crate::osc::luts::{EXP_I16, EXP_I16_NORM, EXP_I16_TAU};
+use crate::util::units::{mHz, ms, Frequency, Hz};
 
 /// Maximum value of the phase accumulator
 const PHI_MAX: u32 = 1 << 20;
@@ -197,7 +197,6 @@ impl<T> Engine<T> {
 pub struct WavetableOscillator {
     _engine: Engine<i16>,
 }
-
 impl WavetableOscillator {
     pub fn new() -> Self {
         let mut s = Self {
@@ -223,7 +222,6 @@ impl WavetableOscillator {
         s
     }
 }
-
 impl Iterator for WavetableOscillator {
     type Item = i16;
 
@@ -262,8 +260,54 @@ impl SineOscillator {
         s
     }
 }
-
 impl Iterator for SineOscillator {
+    type Item = i16;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self._next()
+    }
+}
+
+// Exp i16
+#[derive(Deref)]
+pub struct ExpDecay {
+    _engine: Engine<i16>,
+}
+impl ExpDecay {
+    pub fn new() -> Self {
+        let mut s = Self {
+            _engine: Engine::<i16> {
+                repeat: false,
+                running: false,
+
+                mfreq: mHz(0),
+                msample_rate: mHz(0),
+
+                wavetable: &EXP_I16,
+
+                phi: 0,
+                delta_phi: 0,
+                alpha: 0,
+
+                idx: 0,
+                idx_max: EXP_I16.len(),
+            },
+        };
+        s.set_sample_rate(Hz(44100));
+        s.set_decay_ms(ms(1000));
+        s
+    }
+
+    pub fn set_period_ms(&mut self, dur: ms) {
+        self.set_mfreq(dur.to_mHz());
+    }
+
+    pub fn set_decay_ms(&mut self, decay: ms) {
+        let dur = ms((decay.0 * EXP_I16.len() as u32) / EXP_I16_TAU as u32);
+        self.set_mfreq(dur.to_mHz());
+    }
+}
+impl Iterator for ExpDecay {
     type Item = i16;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -306,6 +350,25 @@ mod test {
         osc.start();
         for x in 0..110 {
             let _y = osc._next();
+            match _y {
+                Some(y) => println!("{}: {}\n", x, (y as f64) / (i16::MAX as f64)),
+                None => {
+                    println!("Generator stopped at {}", x);
+                    break;
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_exp_decay() {
+        let mut decay = ExpDecay::new();
+        decay.set_sample_rate(Hz(1000));
+        decay.set_decay_ms(ms(10));
+        decay.set_repeat(false);
+        decay.start();
+        for x in 0..110 {
+            let _y = decay._next();
             match _y {
                 Some(y) => println!("{}: {}\n", x, (y as f64) / (i16::MAX as f64)),
                 None => {

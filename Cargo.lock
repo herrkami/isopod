@@ -267,7 +267,6 @@ version = "0.1.0"
 dependencies = [
  "derive-deref-rs",
  "num",
- "num-traits",
  "rodio",
 ]
 

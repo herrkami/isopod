@@ -11,7 +11,7 @@ fn main() {
         msample_rate: mHz,
 
         // Primitives
-        noise: WhiteNoise<i16>,
+        noise: WhiteNoise,
         filter: StateVariableFilter,
     }
 
@@ -19,7 +19,7 @@ fn main() {
         fn new() -> Self {
             let mut s = Self {
                 msample_rate: mHz(44_100_000),
-                noise: WhiteNoise::<i16>::new(),
+                noise: WhiteNoise::new(),
                 filter: StateVariableFilter::new(),
             };
 

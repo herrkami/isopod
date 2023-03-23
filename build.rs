@@ -2,6 +2,7 @@
 
 use std::f64::consts::PI;
 use std::fmt::Display;
+use std::ops::Add;
 use std::{fs, path::Path};
 
 /// Directory used to store wavetable files generated during compile time
@@ -10,6 +11,7 @@ const WAVETABLES_DIRECTORY: &str = "src/osc/luts/";
 struct Wavetable<T> {
     table: Vec<T>,
     len: usize,
+    norm: u32,
 }
 
 trait MaxAmp {
@@ -58,6 +60,7 @@ fn generate_wavetable_sine<T: Sized + MaxAmp>(t: T, len: usize) -> Wavetable<T> 
     let mut sine_table = Wavetable::<T> {
         table: Vec::with_capacity(len),
         len: len,
+        norm: (t.max_amp() + 1_f64) as u32,
     };
 
     for i in 0..len {
@@ -73,6 +76,7 @@ fn generate_wavetable_exp<T: Sized + MaxAmp>(t: T, len: usize) -> Wavetable<T> {
     let mut exp_table = Wavetable::<T> {
         table: Vec::with_capacity(len),
         len: len,
+        norm: (t.max_amp() + 1_f64) as u32,
     };
 
     for i in 0..len {
@@ -84,7 +88,10 @@ fn generate_wavetable_exp<T: Sized + MaxAmp>(t: T, len: usize) -> Wavetable<T> {
     exp_table
 }
 
-fn write_table_to_file<T: Sized + MaxAmp + Display>(wavetable: Wavetable<T>, fname: &str) {
+fn write_table_to_file<T: Sized + MaxAmp + Display + Copy + Add<T, Output = T> + Into<T>>(
+    wavetable: Wavetable<T>,
+    fname: &str,
+) {
     let type_string = wavetable.table[0].type_string();
     let wave_string = fname.split("_").collect::<Vec<&str>>()[0].to_uppercase();
 
@@ -116,7 +123,10 @@ fn write_table_to_file<T: Sized + MaxAmp + Display>(wavetable: Wavetable<T>, fna
     if wave_string == "EXP" {
         let t = &wavetable.table[0];
         let tau = t.cast(((wavetable.len as f64) / t.max_amp().ln()).round());
-        let max = t;
+        // let norm: i32 = *<&T as Into<T>>::into(t);
+        // let norm: i32 = *t.into();
+        // let norm: i32 = *t.into() + 1;
+        let norm = &wavetable.norm;
         array_string.push_str("\r\n");
 
         array_string.push_str("pub const ");
@@ -131,8 +141,8 @@ fn write_table_to_file<T: Sized + MaxAmp + Display>(wavetable: Wavetable<T>, fna
         array_string.push_str(&wave_string);
         array_string.push_str("_");
         array_string.push_str(&type_string.to_uppercase());
-        array_string.push_str("_MAX: usize = ");
-        array_string.push_str(max.to_string().as_str());
+        array_string.push_str("_NORM: usize = ");
+        array_string.push_str(norm.to_string().as_str());
         array_string.push_str(";\r\n");
     }
 

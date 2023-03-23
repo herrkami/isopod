@@ -4,11 +4,15 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Korbinian Schreiber"]
 
+[build-dependencies]
+num = "0.4.0"
+
 [dependencies]
 num = "0.4.0"
 rodio = "0.17.0"
-num-traits = "0.2.15"
 derive-deref-rs = "0.1.1"
+
+
 
 [profile.release]
 # opt-level = 'z'     # Optimize for size
