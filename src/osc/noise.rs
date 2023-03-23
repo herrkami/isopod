@@ -1,8 +1,4 @@
-use std::marker::PhantomData;
-
-use num::{Integer, PrimInt};
-
-use crate::util::units::{mHz, Frequency, Hz};
+use crate::util::units::mHz;
 
 /// Linear feedback shift register in Galois configuration
 pub struct LFSR<T> {
@@ -10,18 +6,10 @@ pub struct LFSR<T> {
     mask: T,
 }
 
-impl Default for LFSR<u32> {
-    fn default() -> Self {
-        Self {
-            lfsr: 0xCAFEBABE,
-            mask: 0xA3000000,
-        }
-    }
-}
-
 /// 32-bit linear feedback shift register
 impl LFSR<u32> {
     /// Returns the next value
+    #[inline]
     pub fn next(&mut self) -> u32 {
         let lsb: bool = (self.lfsr & 0x01) != 0;
         self.lfsr >>= 1;
@@ -30,13 +18,17 @@ impl LFSR<u32> {
         }
         self.lfsr
     }
+
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
-impl Default for LFSR<u16> {
+impl Default for LFSR<u32> {
     fn default() -> Self {
         Self {
-            lfsr: 0xBABE,
-            mask: 0xB400,
+            lfsr: 0xCAFEBABE,
+            mask: 0xA3000000,
         }
     }
 }
@@ -53,61 +45,39 @@ impl LFSR<u16> {
         }
         self.lfsr
     }
+
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
-pub struct WhiteNoise<T> {
+impl Default for LFSR<u16> {
+    fn default() -> Self {
+        Self {
+            lfsr: 0xBABE,
+            mask: 0xB400,
+        }
+    }
+}
+
+/// White noise generator
+pub struct WhiteNoise {
     lfsr: LFSR<u32>,
-    seed: T,
-    // phantom: PhantomData<T>,
 }
 
-impl<T> WhiteNoise<T> {
-    fn set_seed(&mut self, seed: T) {
-        self.seed = seed;
-    }
-}
-
-// impl<T: Integer> WhiteNoise<T>
-// // const generic
-// where
-//     T: Integer,
-// {
-//     fn new() -> Self {
-//         let _lfsr = LFSR::<u32>::default();
-//         let _seed: T = 42;
-//         let s = Self {
-//             seed: _seed,
-//             lfsr: _lfsr,
-//         };
-//         s
-//     }
-// }
-
-impl WhiteNoise<i16> {
+impl WhiteNoise {
     pub fn new() -> Self {
         let _lfsr = LFSR::<u32>::default();
-        let _seed = 0x0abe;
-        let s = Self {
-            seed: _seed,
-            lfsr: _lfsr,
-        };
+        let s = Self { lfsr: _lfsr };
         s
+    }
+
+    pub fn set_seed(&mut self, seed: u32) {
+        self.lfsr.lfsr = seed;
     }
 }
 
-impl WhiteNoise<i32> {
-    pub fn new() -> Self {
-        let _lfsr = LFSR::<u32>::default();
-        let _seed = 0x0abe;
-        let s = Self {
-            seed: _seed,
-            lfsr: _lfsr,
-        };
-        s
-    }
-}
-
-impl Iterator for WhiteNoise<i16> {
+impl Iterator for WhiteNoise {
     type Item = i16;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -119,12 +89,21 @@ impl Iterator for WhiteNoise<i16> {
     }
 }
 
-impl Iterator for WhiteNoise<i32> {
-    type Item = i32;
+/// Pink noise generator
+pub struct PinkNoise {
+    lfsr: LFSR<u32>,
+    msample_rate: mHz,
+}
 
-    fn next(&mut self) -> Option<Self::Item> {
-        Some(i32::MAX.overflowing_sub_unsigned(self.lfsr.next()).0)
-    }
+/// Bit flip noise generator
+pub struct BitFlipNoise {
+    lfsr: LFSR<u32>,
+}
+
+/// Crackle noise generator
+pub struct CrackleNoise {
+    lfsr: LFSR<u32>,
+    msample_rate: mHz,
 }
 
 #[cfg(test)]
@@ -143,7 +122,7 @@ mod test {
     }
 
     #[test]
-    #[ignore = "takes very long."]
+    #[ignore = "takes very long (4_294_967_294 iterations)."]
     fn test_lfsr32() {
         let mut lfsr32 = LFSR::<u32>::default();
         let start = lfsr32.next();
@@ -151,13 +130,13 @@ mod test {
         while lfsr32.next() != start {
             period += 1;
         }
-        assert_eq!(period, 4294967294);
+        assert_eq!(period, 4_294_967_294);
     }
 
     #[test]
     fn test_white_noise16() {
         const N: i32 = 1_000_000;
-        let mut white_noise = WhiteNoise::<i16>::new();
+        let mut white_noise = WhiteNoise::new();
         let mut avg = 0_i32;
         let mut min = 0_i32;
         let mut max = 0_i32;
@@ -185,52 +164,4 @@ mod test {
             avg, sym, N, min, max
         );
     }
-
-    #[test]
-    fn test_white_noise32() {
-        const N: i32 = 1_000_000;
-        let mut white_noise = WhiteNoise::<i32>::new();
-        let mut avg = 0_f32;
-        let mut min = 0_i64;
-        let mut max = 0_i64;
-        let mut sym = 0_f32;
-        for _ in 0..N {
-            let x = white_noise.next();
-            match x {
-                Some(x) if x > 0 => sym += 1.0,
-                Some(x) if x < 0 => sym -= 1.0,
-                _ => {}
-            }
-            if (x.unwrap() as i64) < min {
-                min = x.unwrap() as i64;
-            }
-            if (x.unwrap() as i64) > max {
-                max = x.unwrap() as i64;
-            }
-            avg += x.unwrap() as f32;
-            // println!("{:?}", x.unwrap());
-        }
-        avg /= (i32::MAX as i64 * N as i64) as f32;
-        sym /= N as f32;
-        // avg_n /= N / 2;
-        println!(
-            "avg: {:?}, sym: {:?} of {:?}, min: {:?}, max: {:?}",
-            avg, sym, N, min, max
-        );
-    }
-}
-
-pub struct PinkNoise<T> {
-    lfsr: LFSR<T>,
-    msample_rate: mHz,
-}
-
-pub struct BitFlipNoise<T> {
-    lfsr: LFSR<T>,
-    msample_rate: mHz,
-}
-
-pub struct CrackleNoise<T> {
-    lfsr: LFSR<T>,
-    msample_rate: mHz,
 }
