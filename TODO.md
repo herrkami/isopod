@@ -11,13 +11,14 @@ Minimal audio synthesis library for non-FPU architectures
 - [ ] Replace if-clause in `Engine::_next()` by masked addition
 - [ ] Add `ns` and its doctest.
 - [ ] Add linear interpolation iterator to wavetable.
+  - [ ] Reduce the size of `exp_*` and add linear interpolation.
+- [ ] Add Corsini noise.
 
 ### In Progress
 
-  - [ ] Reduce the size of `exp_*` and add linear interpolation.
-
 ### Done ✓
-
+- [x] Finish doc for `Signal` functions
+- [x] Introduce signal newtype.
 - [x] Add `ExpDecay` to wavetable.rs
 - [x] Add doc tests for `us` and `ms`.
 - [x] Implement `Period` and `Frequency` for `us` and `ms`.
